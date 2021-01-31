@@ -56,7 +56,7 @@ def test_create_Gaussian_kernel_1D():
 
     assert np.allclose(gt_kernel_crop, student_kernel_crop, atol=1e-5), "Values dont match"
     assert np.allclose(kernel.sum(), 1, atol=1e-3), "Kernel doesnt sum to 1"
-
+test_create_Gaussian_kernel_1D()
 
 def test_create_Gaussian_kernel_1D_sumsto1():
     """ Verifies that generated 1d Gaussian kernel sums to 1. """

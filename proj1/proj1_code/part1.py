@@ -24,12 +24,13 @@ def create_Gaussian_kernel_1D(ksize: int, sigma: int) -> np.ndarray:
       of the 1d values on the kernel (think of a number line, with a peak at the center).
     - The goal is to discretize a 1d continuous distribution onto a vector.
     """
-    
-    raise NotImplementedError(
-        "`create_Gaussian_kernel_1D` function in `part1.py` needs to be implemented"
-    )
-    
-    return kernel
+    # mean = np.floor(ksize/2)
+    mean = ksize // 2
+    dist = np.linspace(start=0, stop=ksize, num=ksize, endpoint=False)
+    exponent = (-1 / (2 * np.power(sigma, 2))) * np.power((dist - mean), 2)
+    kernel = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(exponent)
+    kernel = kernel / (np.sum(kernel, dtype='float32'))
+    return np.array([kernel]).T
 
 def create_Gaussian_kernel_2D(cutoff_frequency: int) -> np.ndarray:
     """
