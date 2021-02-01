@@ -106,15 +106,51 @@ def my_conv2d_numpy(image: np.ndarray, filter: np.ndarray) -> np.ndarray:
     ############################
     ### TODO: YOUR CODE HERE ###
 
-    raise NotImplementedError(
-        "`my_conv2d_numpy` function in `part1.py` needs to be implemented"
-    )
+    k, j = filter.shape
+    m_padding = k // 2
+    n_padding = j // 2
+    m, n, c = image.shape
+    if c > 1:
+        padded_image = np.dstack(
+            (
+                np.pad(image[:,:,0], [(m_padding, m_padding), (n_padding, n_padding)], mode='constant', constant_values=0),
+                np.pad(image[:,:,1], [(m_padding, m_padding), (n_padding, n_padding)], mode='constant', constant_values=0),
+                np.pad(image[:,:,2], [(m_padding, m_padding), (n_padding, n_padding)], mode='constant', constant_values=0)
+            )
+        )
+    else:
+        padded_image = np.pad(image[:,:,0], (m_padding, n_padding), mode='constant', constant_values=0).reshape((m + 2 * m_padding, n + 2 * n_padding,1))
+    for channel in range(c):
+        for row in range(m):
+            for col in range(n):
+                image[row, col, channel] = np.sum(np.multiply(padded_image[row:row+k, col:col+j, channel], filter))
+    return image
 
     ### END OF STUDENT CODE ####
     ############################
 
     return filtered_image
 
+# filter = np.array(
+#         [
+#             [0, 0, 0],
+#             [0, 1, 0],
+#             [0, 0, 0]
+#         ]
+#     )
+# channel_img = np.array(
+#         [
+#             [0, 1, 2, 3],
+#             [4, 5, 6, 7],
+#             [8, 9, 10, 11],
+#             [12, 13, 14, 15]
+#         ]
+#     )
+# img = np.zeros((4, 4, 3), dtype=np.uint8)
+# img[:, :, 0] = channel_img
+# img[:, :, 1] = channel_img
+# img[:, :, 2] = channel_img
+# my_conv2d_numpy(img, filter)
 
 def create_hybrid_image(
     image1: np.ndarray, image2: np.ndarray, filter: np.ndarray
