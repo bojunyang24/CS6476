@@ -29,7 +29,7 @@ def create_Gaussian_kernel_1D(ksize: int, sigma: int) -> np.ndarray:
     dist = np.linspace(start=0, stop=ksize, num=ksize, endpoint=False)
     exponent = (-1 / (2 * np.power(sigma, 2))) * np.power((dist - mean), 2)
     kernel = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(exponent)
-    kernel = kernel / (np.sum(kernel, dtype='float32'))
+    kernel = normalize(kernel)
     return np.array([kernel]).T
 
 def create_Gaussian_kernel_2D(cutoff_frequency: int) -> np.ndarray:
@@ -62,15 +62,16 @@ def create_Gaussian_kernel_2D(cutoff_frequency: int) -> np.ndarray:
     ############################
     ### TODO: YOUR CODE HERE ###
 
-    raise NotImplementedError(
-        "`create_Gaussian_kernel_2D` function in `part1.py` needs to be implemented"
-    )
+    k = cutoff_frequency * 4 + 1
+    sigma = cutoff_frequency
+    v = create_Gaussian_kernel_1D(k, sigma)
+    return normalize(np.outer(v,v))
 
     ### END OF STUDENT CODE ####
     ############################
 
-    return kernel
-
+def normalize(np_array: np.ndarray) -> np.ndarray:
+    return np_array / np.sum(np_array)
 
 def my_conv2d_numpy(image: np.ndarray, filter: np.ndarray) -> np.ndarray:
     """Apply a single 2d filter to each channel of an image. Return the filtered image.
