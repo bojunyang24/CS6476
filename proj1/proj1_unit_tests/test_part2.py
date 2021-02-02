@@ -84,7 +84,7 @@ def test_pytorch_low_pass_filter_square_kernel() -> None:
 
     # ground truth element sum
     assert np.allclose(pytorch_low_freq.numpy().sum(), 209926.3481)
-# test_pytorch_low_pass_filter_square_kernel()
+test_pytorch_low_pass_filter_square_kernel()
 
 def test_low_freq_sq_kernel_pytorch() -> None:
     """Test the low frequencies that are an output of the forward pass."""

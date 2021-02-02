@@ -59,7 +59,7 @@ def make_dataset(path: str) -> Tuple[List[str], List[str]]:
     ############################
 
     return images_a, images_b
-make_dataset('../data')
+
 
 def get_cutoff_frequencies(path: str) -> List[int]:
     """
@@ -176,4 +176,4 @@ class HybridImageDataset(data.Dataset):
         ### END OF STUDENT CODE ####
         ############################
 
-        return image_a, image_b, cutoff_frequency
+        return image_a.float(), image_b.float(), cutoff_frequency

@@ -60,7 +60,7 @@ class HybridImageModel(nn.Module):
         ### END OF STUDENT CODE ####
         ############################
 
-        return kernel
+        return kernel.float()
 
     def low_pass(self, x: torch.Tensor, kernel: torch.Tensor):
         """
@@ -86,7 +86,7 @@ class HybridImageModel(nn.Module):
         _, _, k, j = kernel.shape
         padH = k // 2
         padW = j // 2
-        filtered_image = F.conv2d(x, kernel.double(), padding=(padH, padW), groups=self.n_channels).float()
+        filtered_image = F.conv2d(x, kernel, padding=(padH, padW), groups=self.n_channels).float()
         # print(209926.3481)
         # print(int(filtered_image.sum()))
         ### END OF STUDENT CODE ####
