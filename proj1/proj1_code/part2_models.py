@@ -17,7 +17,8 @@ class HybridImageModel(nn.Module):
         """
         Initializes an instance of the HybridImageModel class.
         """
-        super(HybridImageModel, self).__init__()
+        # super(HybridImageModel, self).__init__()
+        super().__init__()
 
     def get_kernel(self, cutoff_frequency: int) -> torch.Tensor:
         """
@@ -51,9 +52,10 @@ class HybridImageModel(nn.Module):
         ############################
         ### TODO: YOUR CODE HERE ###
 
-        raise NotImplementedError(
-            "`get_kernel` function in `part2_models.py` needs to be implemented"
-        )
+        kernel = create_Gaussian_kernel_2D(cutoff_frequency)
+        kernel = kernel.reshape(1, 1, kernel.shape[0], kernel.shape[1])
+        kernel = np.tile(kernel, (self.n_channels, 1, 1, 1))
+        kernel = torch.tensor(kernel)
 
         ### END OF STUDENT CODE ####
         ############################
@@ -81,11 +83,12 @@ class HybridImageModel(nn.Module):
 
         ############################
         ### TODO: YOUR CODE HERE ###
-
-        raise NotImplementedError(
-            "`low_pass` function in `part2_models.py` needs to be implemented"
-        )
-
+        _, _, k, j = kernel.shape
+        padH = k // 2
+        padW = j // 2
+        filtered_image = F.conv2d(x, kernel.double(), padding=(padH, padW), groups=self.n_channels).float()
+        # print(209926.3481)
+        # print(int(filtered_image.sum()))
         ### END OF STUDENT CODE ####
         ############################
 
@@ -124,9 +127,11 @@ class HybridImageModel(nn.Module):
         ############################
         ### TODO: YOUR CODE HERE ###
 
-        raise NotImplementedError(
-            "`forward` function in `part2_models.py` needs to be implemented"
-        )
+        filter = self.get_kernel(int(cutoff_frequency.item()))
+        low_frequencies = self.low_pass(image1, filter)
+        high_frequencies = (image2 - self.low_pass(image2, filter)).float()
+        hybrid_image = low_frequencies + high_frequencies
+        hybrid_image = hybrid_image.clamp(0, 1)
 
         ### END OF STUDENT CODE ####
         ############################
