@@ -110,6 +110,7 @@ def my_conv2d_numpy(image: np.ndarray, filter: np.ndarray) -> np.ndarray:
     m_padding = k // 2
     n_padding = j // 2
     m, n, c = image.shape
+    filtered_image = np.empty(image.shape)
     if c > 1:
         padded_image = np.dstack(
             (
@@ -123,38 +124,18 @@ def my_conv2d_numpy(image: np.ndarray, filter: np.ndarray) -> np.ndarray:
     for channel in range(c):
         for row in range(m):
             for col in range(n):
-                image[row, col, channel] = np.sum(np.multiply(padded_image[row:row+k, col:col+j, channel], filter))
-    return image
+                filtered_image[row, col, channel] = np.sum(np.multiply(padded_image[row:row+k, col:col+j, channel], filter))
 
     ### END OF STUDENT CODE ####
     ############################
 
     return filtered_image
 
-# filter = np.array(
-#         [
-#             [0, 0, 0],
-#             [0, 1, 0],
-#             [0, 0, 0]
-#         ]
-#     )
-# channel_img = np.array(
-#         [
-#             [0, 1, 2, 3],
-#             [4, 5, 6, 7],
-#             [8, 9, 10, 11],
-#             [12, 13, 14, 15]
-#         ]
-#     )
-# img = np.zeros((4, 4, 3), dtype=np.uint8)
-# img[:, :, 0] = channel_img
-# img[:, :, 1] = channel_img
-# img[:, :, 2] = channel_img
-# my_conv2d_numpy(img, filter)
 
 def create_hybrid_image(
-    image1: np.ndarray, image2: np.ndarray, filter: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    image1: np.ndarray,
+    image2: np.ndarray,
+    filter: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Takes two images and a low-pass filter and creates a hybrid image. Returns
     the low frequency content of image1, the high frequency content of image 2,
@@ -190,9 +171,10 @@ def create_hybrid_image(
     ############################
     ### TODO: YOUR CODE HERE ###
 
-    raise NotImplementedError(
-        "`create_hybrid_image` function in `part1.py` needs to be implemented"
-    )
+    low_frequencies = my_conv2d_numpy(image1, filter)
+    high_frequencies = image2 - my_conv2d_numpy(image2, filter)
+    hybrid_image = low_frequencies + high_frequencies
+    hybrid_image = np.clip(hybrid_image, 0, 1)
 
     ### END OF STUDENT CODE ####
     ############################

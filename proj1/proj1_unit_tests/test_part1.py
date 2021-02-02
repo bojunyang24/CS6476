@@ -274,3 +274,4 @@ def test_hybrid_image_np() -> None:
 	# plt.imshow(hybrid_image)
 	# plt.show()
 	########################################
+test_hybrid_image_np()
