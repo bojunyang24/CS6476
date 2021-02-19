@@ -38,9 +38,17 @@ def compute_image_gradients(image_bw: np.ndarray) -> Tuple[np.ndarray, np.ndarra
     ###########################################################################
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
-
-    raise NotImplementedError('`compute_image_gradients` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    rx, cx = SOBEL_X_KERNEL.shape
+    ry, cy = SOBEL_Y_KERNEL.shape
+    padHx = rx // 2
+    padWx = cx // 2
+    padHy = ry // 2
+    padWy = cy // 2
+    SOBEL_X = torch.tensor(torch_shape(SOBEL_X_KERNEL))
+    SOBEL_Y = torch.tensor(torch_shape(SOBEL_Y_KERNEL))
+    image = torch.tensor(torch_shape(image_bw))
+    Ix = nn.functional.conv2d(image, SOBEL_X, padding=(padHx, padWx)).numpy()[0][0]
+    Iy = nn.functional.conv2d(image, SOBEL_Y, padding=(padHy, padWy)).numpy()[0][0]
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -48,6 +56,8 @@ def compute_image_gradients(image_bw: np.ndarray) -> Tuple[np.ndarray, np.ndarra
 
     return Ix, Iy
 
+def torch_shape(arr_2d : np.ndarray) -> np.ndarray:
+    return np.tile(arr_2d, (1,1,1,1))
 
 def get_gaussian_kernel_2D_pytorch(ksize: int, sigma: float) -> torch.Tensor:
     """Create a Pytorch Tensor representing a 2d Gaussian kernel
@@ -66,8 +76,20 @@ def get_gaussian_kernel_2D_pytorch(ksize: int, sigma: float) -> torch.Tensor:
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`get_gaussian_kernel_2D_pytorch` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    # create gaussian kernel 1d
+    mean = ksize // 2
+    dist = np.linspace(start=0, stop=ksize, num=ksize, endpoint=False)
+    exponent = (-1 / (2 * np.power(sigma, 2))) * np.power((dist - mean), 2)
+    kernel = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(exponent)
+    kernel = normalize(kernel)
+    v = np.array([kernel]).T
+
+    # create gaussian kernel 2d
+    kernel = torch.tensor(
+        normalize(
+            np.outer(v,v)
+        )
+    ).float()
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -75,6 +97,8 @@ def get_gaussian_kernel_2D_pytorch(ksize: int, sigma: float) -> torch.Tensor:
 
     return kernel
 
+def normalize(np_array: np.ndarray) -> np.ndarray:
+    return np_array / np.sum(np_array)
 
 def second_moments(
     image_bw: np.ndarray,
@@ -104,8 +128,16 @@ def second_moments(
     # TODO: YOUR SECOND MOMENTS CODE HERE                                     #
     ###########################################################################
 
-    raise NotImplementedError('`second_moments` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    Ix, Iy = compute_image_gradients(image_bw)
+    kernel = get_gaussian_kernel_2D_pytorch(ksize, sigma)
+
+    Ix2 = Ix * Ix
+    Iy2 = Iy * Iy
+    IxIy = Ix * Iy
+    
+    sx2 = apply_kernel(Ix2, kernel)
+    sy2 = apply_kernel(Iy2, kernel)
+    sxsy = apply_kernel(IxIy, kernel)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -113,6 +145,18 @@ def second_moments(
 
     return sx2, sy2, sxsy
 
+
+def apply_kernel(image_bw: np.ndarray, kernel: np.ndarray) -> np.ndarray:
+    """
+    Take greyscale image (2 dimensional) and kernel (2 dimensional) and apply kernel to image and return filtered image
+    """
+    r, c = kernel.shape
+    padH = r // 2
+    padW = c // 2
+    # shape the kernel into torch specified shape
+    torch_kernel = torch.tensor(torch_shape(kernel))
+    torch_image = torch.tensor(torch_shape(image_bw))
+    return nn.functional.conv2d(torch_image, torch_kernel, padding=(padH, padW)).numpy()[0][0]
 
 def compute_harris_response_map(
     image_bw: np.ndarray,
@@ -138,7 +182,7 @@ def compute_harris_response_map(
 
     Args:
         image_bw: array of shape (M,N) containing the grayscale image
-            ksize: size of 2d Gaussian filter
+        ksize: size of 2d Gaussian filter
         sigma: standard deviation of gaussian filter
         alpha: scalar term in Harris response score
 
@@ -150,8 +194,11 @@ def compute_harris_response_map(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`compute_harris_response_map` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    sx2, sy2, sxsy = second_moments(image_bw, ksize, sigma)
+    
+    det = (sx2 * sy2) - (sxsy ** 2)
+    trace = sx2 + sy2
+    R = det - alpha * (trace ** 2)
 
     ###########################################################################
     #                           END OF YOUR CODE                              #
@@ -159,6 +206,8 @@ def compute_harris_response_map(
 
     return R
 
+def normalize(np_array: np.ndarray) -> np.ndarray:
+    return np_array / np.sum(np_array)
 
 def maxpool_numpy(R: np.ndarray, ksize: int) -> np.ndarray:
     """ Implement the 2d maxpool operator with (ksize,ksize) kernel size.
@@ -178,8 +227,13 @@ def maxpool_numpy(R: np.ndarray, ksize: int) -> np.ndarray:
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`maxpool_numpy` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    M, N = R.shape
+    padding = ksize // 2
+    maxpooled_R = np.empty(R.shape)
+    padded_image = np.pad(R, (padding, padding), mode='constant', constant_values=0).reshape((M + 2 * padding, N + 2 * padding))
+    for row in range(M):
+        for col in range(N):
+            maxpooled_R[row, col] = np.max(padded_image[row:row+ksize, col:col+ksize])
 
     ###########################################################################
     #                           END OF YOUR CODE                              #
@@ -228,8 +282,19 @@ def nms_maxpool_pytorch(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`nms_maxpool_pytorch` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    median = torch.median(torch.tensor(R))
+    R[R < median.item()] = 0.0
+    pool = nn.MaxPool2d(kernel_size=ksize, stride=1, padding=ksize//2)
+    tensor_R = torch.tensor(torch_shape(R))
+    pooled_R = pool(tensor_R)
+    binary = R == pooled_R.numpy()[0][0]
+    interesting = binary * R
+    r, c = np.nonzero(interesting)
+    confidences = R[r,c]
+    ind = np.argsort(-confidences)
+    x = np.take_along_axis(c, ind, axis=0)[:k]
+    y = np.take_along_axis(r, ind, axis=0)[:k]
+    confidences = np.take_along_axis(confidences, ind, axis=0)[:k]
 
     ###########################################################################
     #                           END OF YOUR CODE                              #
@@ -265,8 +330,14 @@ def remove_border_vals(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`remove_border_vals` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    # row is y is M, col is x is N
+    M, N = img.shape
+    x_mask = (x >= 7) * (x <= N - 9)
+    y_mask = (y >= 7) * (y <= M - 9)
+    mask = x_mask * y_mask
+    x = x[mask]
+    y = y[mask]
+    c = c[mask]
 
     ###########################################################################
     #                           END OF YOUR CODE                              #
@@ -300,8 +371,10 @@ def get_harris_interest_points(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`get_harris_interest_points` function in ' +
-        '`part1_harris_corner.py` needs to be implemented')
+    R = compute_harris_response_map(image_bw)
+    x,y,c = nms_maxpool_pytorch(R, k, 7)
+    x,y,c = remove_border_vals(image_bw, x, y, c)
+    c = c / np.max(c)
 
     ###########################################################################
     #                           END OF YOUR CODE                              #
