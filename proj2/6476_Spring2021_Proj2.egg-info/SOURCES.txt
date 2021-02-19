@@ -1,0 +1,17 @@
+README.md
+setup.py
+6476_Spring2021_Proj2.egg-info/PKG-INFO
+6476_Spring2021_Proj2.egg-info/SOURCES.txt
+6476_Spring2021_Proj2.egg-info/dependency_links.txt
+6476_Spring2021_Proj2.egg-info/top_level.txt
+proj2_code/__init__.py
+proj2_code/part1_harris_corner.py
+proj2_code/part2_patch_descriptor.py
+proj2_code/part3_feature_matching.py
+proj2_code/part4_sift_descriptor.py
+proj2_code/utils.py
+proj2_unit_tests/__init__.py
+proj2_unit_tests/test_part1_harris_corner.py
+proj2_unit_tests/test_part2_patch_descriptor.py
+proj2_unit_tests/test_part3_feature_matching.py
+proj2_unit_tests/test_part4_sift_descriptor.py
