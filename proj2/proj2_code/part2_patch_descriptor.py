@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 
 import numpy as np
+from numpy.lib.financial import fv
+from numpy.lib.type_check import imag
 
 
 def compute_normalized_patch_descriptors(
-    image_bw: np.ndarray, X: float, Y: float, feature_width: int
+    image_bw: np.ndarray, X: np.ndarray, Y: np.ndarray, feature_width: int
 ) -> np.ndarray:
     """Create local features using normalized patches.
 
@@ -28,9 +30,19 @@ def compute_normalized_patch_descriptors(
     ###########################################################################
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
-
-    raise NotImplementedError('`compute_normalized_patch_descriptors` ' +
-        'function in`part2_patch_descriptor.py` needs to be implemented')
+    if feature_width%2 == 0:
+        lower = (feature_width - 2)//2
+        upper = feature_width//2 + 1
+    else:
+        upper = feature_width // 2
+        lower = feature_width // 2
+    fvs = np.empty((X.shape[0], feature_width**2))
+    for i in range(len(X)):
+        x = X[i]
+        y = Y[i]
+        window = image_bw[y-lower:y+upper, x-lower:x+upper]
+        window = (1 / np.linalg.norm(window)) * window
+        fvs[i] = window.flatten()
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
