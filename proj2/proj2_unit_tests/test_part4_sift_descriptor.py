@@ -36,7 +36,7 @@ def test_get_magnitudes_and_orientations():
 
     assert np.allclose(magnitudes, expected_magnitudes)
     assert np.allclose(orientations, expected_orientations)
-
+test_get_magnitudes_and_orientations()
 
 def test_get_gradient_histogram_vec_from_patch():
     """ Check if weighted gradient histogram is computed correctly """

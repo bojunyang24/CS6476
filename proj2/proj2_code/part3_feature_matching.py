@@ -36,8 +36,15 @@ def compute_feature_distances(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`compute_feature_distances` function in ' +
-        '`part3_feature_matching.py` needs to be implemented')
+    n1 = features1.shape[0]
+    n2 = features2.shape[0]
+    dists = np.empty((n1, n2))
+    for i in range(n1):
+        v = features1[i]
+        dists[i] = np.sqrt(
+            np.sum((v - features2) ** 2, axis=1)
+        )
+
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -83,8 +90,17 @@ def match_features_ratio_test(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`match_features_ratio_test` function in ' +
-        '`part3_feature_matching.py` needs to be implemented')
+    dists = compute_feature_distances(features1, features2)
+    ind = np.argsort(dists, axis=1)
+    sorted_dists = np.take_along_axis(dists, ind, axis=1)
+    confidences = sorted_dists[:,0] / sorted_dists[:,1]
+    mask = confidences <= 0.80
+    confidences = confidences[mask]
+    matches = np.stack(
+        [np.argwhere(mask).flatten(), ind[mask, 0]],
+        axis=1
+    )
+
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
