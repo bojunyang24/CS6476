@@ -107,7 +107,7 @@ def test_get_gradient_histogram_vec_from_patch():
     ).reshape(128, 1)
 
     assert np.allclose(wgh, expected_wgh, atol=1e-1)
-
+test_get_gradient_histogram_vec_from_patch()
 
 def test_get_feat_vec():
     """ Check if feature vector for a specific interest point is returned correctly """
@@ -182,7 +182,7 @@ def test_get_feat_vec():
     ).reshape(128, 1)
 
     assert np.allclose(fv, expected_fv, atol=1e-1)
-
+test_get_feat_vec()
 
 def test_get_SIFT_descriptors():
     """ Check if the 128-d SIFT feature vector computed at each of the input points is returned correctly """
@@ -256,7 +256,7 @@ def test_get_SIFT_descriptors():
     ).reshape(2, 128)
 
     assert np.allclose(SIFT_descriptors, expected_SIFT_descriptors, atol=1e-1)
-
+test_get_SIFT_descriptors()
 
 def test_feature_matching_speed():
     """

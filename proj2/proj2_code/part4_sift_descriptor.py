@@ -54,6 +54,8 @@ def get_magnitudes_and_orientations(
 
     magnitudes = np.sqrt((Ix ** 2) + (Iy ** 2))
     orientations = np.arctan2(Iy, Ix)
+    # magnitudes = np.around(magnitudes, 4)
+    orientations = np.around(orientations, 4)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -98,9 +100,20 @@ def get_gradient_histogram_vec_from_patch(
     ###########################################################################
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
-
-    raise NotImplementedError('`get_gradient_histogram_vec_from_patch` ' +
-        'function in `part4_sift_descriptor.py` needs to be implemented')
+    cell_size = int(window_magnitudes.shape[0] / 4)
+    wgh = np.empty((cell_size * cell_size * 8, 1))
+    bins = np.around(np.array([-np.pi, -3 * np.pi / 4, -np.pi / 2, -np.pi / 4, 0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi]), 3)
+    for r in range(cell_size):
+        for c in range(cell_size):
+            row = r * 4
+            col = c * 4
+            cell_orientations = window_orientations[row:row+4, col:col+4]
+            cell_magnitudes = window_magnitudes[row:row+4, col:col+4]
+            h, _ = np.histogram(cell_orientations, bins=bins, weights=cell_magnitudes)
+            i = (r*cell_size*8) + (c*8)
+            j = i + 8
+            wgh[i:j, 0] = h
+    
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -162,8 +175,17 @@ def get_feat_vec(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`get_feat_vec` function in ' +
-        '`student_sift.py` needs to be implemented')
+    f = feature_width // 2
+    x_low = x - (f - 1)
+    x_high = x + (f + 1)
+    y_low = y - (f - 1)
+    y_high = y + (f + 1)
+    window_magnitudes = magnitudes[y_low:y_high, x_low:x_high]
+    window_orientations = orientations[y_low:y_high, x_low:x_high]
+    feature_vector = get_gradient_histogram_vec_from_patch(window_magnitudes, window_orientations)
+    fv = np.sqrt(
+        feature_vector / np.linalg.norm(feature_vector, axis=0, ord=2)
+    )
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -184,7 +206,7 @@ def get_SIFT_descriptors(
     the original publications at http://www.cs.ubc.ca/~lowe/keypoints/)
 
     Args:
-        image: A numpy array of shape (m,n), the image
+        image_bw: A numpy array of shape (m,n), the image
         X: A numpy array of shape (k,), the x-coordinates of interest points
         Y: A numpy array of shape (k,), the y-coordinates of interest points
         feature_width: integer representing the local feature width in pixels.
@@ -203,8 +225,12 @@ def get_SIFT_descriptors(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`get_SIFT_descriptors` function in ' +
-        '`part4_sift_descriptor.py` needs to be implemented')
+    fvs = np.empty((len(X), int(feature_width/4 * 4 * 8)))
+    Ix, Iy = compute_image_gradients(image_bw)
+    magnitudes, orientations = get_magnitudes_and_orientations(Ix, Iy)
+    orientations = np.around(orientations, 3)
+    for i in range(len(X)):
+        fvs[i] = get_feat_vec(X[i], Y[i], magnitudes, orientations, feature_width).T
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -264,8 +290,11 @@ def get_sift_features_vectorized(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`get_SIFT_features_vectorized` function in ' +
-        '`part4_sift_descriptor.py` needs to be implemented')
+    fvs = np.empty((len(X), int(16/4 * 4 * 8)))
+    Ix, Iy = compute_image_gradients(image_bw)
+    magnitudes, orientations = get_magnitudes_and_orientations(Ix, Iy)
+    for i in range(len(X)):
+        fvs[i] = get_feat_vec(X[i], Y[i], magnitudes, orientations, 16).T
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
