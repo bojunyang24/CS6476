@@ -19,9 +19,23 @@ def normalize_points(points: np.ndarray) -> (np.ndarray, np.ndarray):
     ###########################################################################
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
-
-    raise NotImplementedError('`normalize_points` function in ' +
-        '`fundamental_matrix.py` needs to be implemented')
+    cu, cv = np.mean(points, axis=0)
+    su = 1/np.std(points[:,0] - cu)
+    sv = 1/np.std(points[:,1] - cv)
+    scale = np.array([
+        [su, 0, 0],
+        [0, sv, 0],
+        [0, 0, 1]
+    ])
+    offset = np.array([
+        [1, 0, -cu],
+        [0, 1, -cv],
+        [0, 0, 1]
+    ])
+    T = np.dot(scale, offset)
+    points_3d = np.hstack((points, np.ones((points.shape[0],1))))
+    uv1 = np.dot(T,points_3d.T).T
+    points_normalized = uv1[:,:2]
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -50,8 +64,7 @@ def unnormalize_F(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`unnormalize_F` function in ' +
-        '`fundamental_matrix.py` needs to be implemented')
+    F_orig = T_b.T.dot(F_norm).dot(T_a)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -79,8 +92,48 @@ def estimate_fundamental_matrix(
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`estimate_fundamental_matrix` function in ' +
-        '`fundamental_matrix.py` needs to be implemented')
+    # a[0] = u, a[1] = v
+    a, T_a = normalize_points(points_a)
+    # b[0] = u', b[1] = v'
+    b, T_b = normalize_points(points_b)
+    # SVD method
+    # A = np.stack(
+    #     (
+    #         a[:,0]*b[:,0], a[:,1]*b[:,0], b[:,0],
+    #         a[:,0]*b[:,1], a[:,1]*b[:,1], b[:,1],
+    #         a[:,0], a[:,1], np.ones((a.shape[0]))
+    #     ), axis=1
+    # )
+    # u, s, v = np.linalg.svd(A)
+    # F = v[-1,:].reshape((3,3))
+    # U,S,V = np.linalg.svd(F)
+    # S = np.sort(S)[::-1]
+    # S2 = np.array([
+    #     [S[0], 0, 0],
+    #     [0, S[1], 0],
+    #     [0, 0, 0]
+    # ])
+    # F = U.dot(S2).dot(V)
+    # F = unnormalize_F(F, T_a, T_b)
+
+    # least squares method
+    A = np.stack(
+        (
+            a[:,0]*b[:,0], a[:,1]*b[:,0], b[:,0],
+            a[:,0]*b[:,1], a[:,1]*b[:,1], b[:,1],
+            a[:,0], a[:,1]
+        ), axis=1
+    )
+    F, residuals, rank, s = np.linalg.lstsq(A, -np.ones((A.shape[0])), rcond=None)
+    F = np.append(F, 1).reshape(3,3)
+    u,s,v = np.linalg.svd(F)
+    S = np.array([
+        [s[0], 0, 0],
+        [0, s[1], 0],
+        [0, 0, 0]
+    ])
+    F = u.dot(S).dot(v)
+    F = unnormalize_F(F, T_a, T_b)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
