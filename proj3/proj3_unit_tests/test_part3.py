@@ -49,3 +49,4 @@ def test_ransac_fundamental_matrix():
     expected_F /= expected_F[2, 2]
 
     assert np.allclose(F, expected_F, atol=1e-2)
+test_ransac_fundamental_matrix()
