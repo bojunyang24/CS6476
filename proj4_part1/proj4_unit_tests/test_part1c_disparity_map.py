@@ -189,6 +189,6 @@ def test_calculate_cost_volume():
     right_image = torch.zeros((10, 10, 3))
     right_image[5, 3, :] = 1
 
-    cost_volume = calculate_cost_volume(left_image, right_image, 7, sad_similarity_measure, 2)
+    cost_volume = calculate_cost_volume(left_image, right_image, 7, sad_similarity_measure, 3)
 
     assert np.argmin(cost_volume[5, 6, :].cpu().numpy()) == 3

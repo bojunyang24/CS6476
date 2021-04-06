@@ -53,14 +53,38 @@ def calculate_disparity_map(
     """
 
     assert left_img.shape == right_img.shape
-    disp_map = torch.zeros(1)  # placeholder, this is not the actual size
 
     ###########################################################################
     # Student code begins
     ###########################################################################
+    block_half = block_size//2
+    disp_map = torch.zeros(left_img.shape[0] - 2*block_half, left_img.shape[1] - 2*block_half)
+    leftmost = block_half
+    # for row in range(block_half, left_img.shape[0]-block_half):
+    #     for col in range(leftmost, left_img.shape[1]-block_half):
+    #         pass
+    for r in range(0, disp_map.shape[0]):
+        for c in range(0, disp_map.shape[1]):
+            row = r + block_half # row is indexing for patches, r is indexing for disp_map
+            col = c + leftmost # col is indexing for patches, c is indexing for disp_map
+            if block_half == 0:
+                left_patch = left_img[row, col, :]
+                sim_error = [] # indices are disparity, values are similarity error
+                for disparity in range(max_search_bound+1):
+                    if col - disparity >= 0:
+                        right_patch = right_img[row, col-disparity, :]
+                        sim_error.append(sim_measure_function(left_patch, right_patch))
+                disp_map[r, c] = np.argmin(sim_error)
+            else:
+                left_patch = left_img[row-block_half:row+block_half+1, col-block_half:col+block_half+1, :]
+                sim_error = [] # indices are disparity, values are similarity error
+                for disparity in range(max_search_bound+1):
+                    if col - block_half - disparity >= 0:
+                        right_patch = right_img[row-block_half:row+block_half+1, col-block_half-disparity:col+block_half-disparity+1, :]
+                        sim_error.append(sim_measure_function(left_patch, right_patch))
+                disp_map[r, c] = np.argmin(sim_error)
 
-    raise NotImplementedError('`calculate_disparity_map` function in ' +
-        '`part1c_disparity_map.py` needs to be implemented')
+        
 
     ###########################################################################
     # Student code ends
@@ -105,16 +129,33 @@ def calculate_cost_volume(
             shifted by disparity d in the right image.
     """
     # placeholders
-    H = left_img.shape[0]
-    W = right_img.shape[1]
-    cost_volume = torch.zeros(H, W, max_disparity)
 
     ###########################################################################
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`calculate_cost_volume` function in ' +
-        '`part1c_disparity_map.py` needs to be implemented')
+    block_half = block_size//2
+    H = left_img.shape[0] - 2*block_half
+    W = right_img.shape[1] - 2*block_half
+    cost_volume = torch.zeros(H, W, max_disparity)
+    
+    leftmost = block_half
+    for r in range(0, cost_volume.shape[0]):
+        for c in range(0, cost_volume.shape[1]):
+            row = r + block_half # row is indexing for patches, r is indexing for disp_map
+            col = c + leftmost # col is indexing for patches, c is indexing for disp_map
+            if block_half == 0:
+                left_patch = left_img[row, col, :]
+                for disparity in range(max_disparity):
+                    if col - disparity >= 0:
+                        right_patch = right_img[row, col-disparity, :]
+                        cost_volume[r, c, disparity] = sim_measure_function(left_patch, right_patch)
+            else:
+                left_patch = left_img[row-block_half:row+block_half+1, col-block_half:col+block_half+1, :]
+                for disparity in range(max_disparity):
+                    if col - block_half - disparity >= 0:
+                        right_patch = right_img[row-block_half:row+block_half+1, col-block_half-disparity:col+block_half-disparity+1, :]
+                        cost_volume[r, c, disparity] = sim_measure_function(left_patch, right_patch)
 
     ###########################################################################
     # Student code ends

@@ -27,8 +27,7 @@ def ssd_similarity_measure(patch1: torch.Tensor, patch2: torch.Tensor) -> float:
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`ssd_similarity_measure` function in ' +
-        '`part1b_similarity_measure.py` needs to be implemented')
+    ssd = torch.sum(torch.square(patch1 - patch2)).item()
 
     ###########################################################################
     # Student code ends
@@ -58,8 +57,7 @@ def sad_similarity_measure(patch1: torch.Tensor, patch2: torch.Tensor) -> float:
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`sad_similarity_measure` function in ' +
-        '`part1b_similarity_measure.py` needs to be implemented')
+    sad = torch.sum(torch.abs(patch1 - patch2)).item()
 
     ###########################################################################
     # Student code ends

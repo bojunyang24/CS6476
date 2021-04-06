@@ -6,6 +6,7 @@ from typing import Any, List, Tuple
 
 import numpy as np
 import torch
+from torch import tensor
 
 
 def generate_random_stereogram(
@@ -50,9 +51,22 @@ def generate_random_stereogram(
     ###########################################################################
     # Student code begins
     ###########################################################################
-
-    raise NotImplementedError('`generate_random_stereogram` function in ' +
-        '`part1a_random_stereogram.py` needs to be implemented')
+    left_layer = torch.randint(0,2,(H,W))
+    upper_left = (H//2 - block_size[0]//2, W//2 - block_size[1]//2)
+    block_range = [(upper_left[0], upper_left[0] + block_size[0]), (upper_left[1], upper_left[1] + block_size[1])]
+    block = left_layer[block_range[0][0]:block_range[0][1], block_range[1][0]:block_range[1][1]]
+    right_layer = left_layer.clone()
+    right_layer[block_range[0][0]:block_range[0][1], (block_range[1][0] - disparity):(block_range[1][1] - disparity)] = block
+    right_layer[block_range[0][0]:block_range[0][1], (block_range[1][1] - disparity):block_range[1][1]] = torch.randint(0,2,(block_size[0], disparity))
+    left_stack = []
+    right_stack = []
+    for i in range(C):
+        left_stack.append(left_layer)
+        right_stack.append(right_layer)
+    im_left = torch.stack(left_stack, 2)
+    im_right = torch.stack(right_stack, 2)
+    im_left = im_left.float()
+    im_right = im_right.float()
 
     ###########################################################################
     # Student code ends
