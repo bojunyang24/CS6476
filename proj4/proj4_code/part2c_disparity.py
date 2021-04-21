@@ -67,6 +67,9 @@ def calculate_mccnn_cost_volume(
 
     feature_extractor = net.conv
     fc_layers = net.classifier
+    C, H, W = left_img.shape
+    block_half = block_size//2
+    cost_volume = torch.ones(H - 2*block_half, W - 2*block_half, max_search_bound) * 255
 
     with torch.no_grad():
         cnn_left_img = feature_extractor(left_img.unsqueeze(0))
@@ -76,10 +79,20 @@ def calculate_mccnn_cost_volume(
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError(
-        "`calculate_mccnn_cost_volume` function in "
-        + "`part2c_disparity.py` needs to be implemented"
-    )
+        leftmost = block_half
+        for r in range(0, cost_volume.shape[0]):
+            for c in range(0, cost_volume.shape[1]):
+                row = r + block_half
+                col = c + leftmost
+                cnn_patch = cnn_left_img[:, :, row-block_half:row-block_half+block_size, col-block_half:col-block_half+block_size] # left patch
+                cnn_search_stack = []
+                for disparity in range(max_search_bound):
+                    if col - block_half - disparity >= 0:
+                        search_patch = cnn_right_img[:, :, row-block_half:row-block_half+block_size, col-block_half-disparity:col-block_half-disparity+block_size]
+                        cnn_search_stack.append(search_patch[0,:,:,:])
+                cnn_search_window = torch.stack(cnn_search_stack, 0)
+                sim_scores = torch.flatten(sim_measure_function(fc_layers, cnn_patch, cnn_search_window))
+                cost_volume[r,c,0:len(sim_scores)] = sim_scores
 
     ###########################################################################
     # Student code ends
@@ -195,11 +208,16 @@ def mc_cnn_similarity(
     # IMPORTANT: Read the docstring _carefully_ before you write this code
 
     ###########################################################################
-
-    raise NotImplementedError(
-        "`mc_cnn_similarity` function in "
-        + "`part2c_disparity.py` needs to be implemented"
-    )
+    
+    with torch.no_grad():
+        cnn_sample = cnn_patch[0,:,:,:]
+        flattened_tensors = []
+        for i in range(cnn_search_window.shape[0]):
+            ith_tensor = cnn_search_window[i,:,:,:]
+            flattened_tensor = torch.stack([cnn_sample, ith_tensor], 0).view(-1)
+            flattened_tensors.append(flattened_tensor)
+        combined_tensors = torch.stack(flattened_tensors, 0)
+        cnn_similarity = fc_layers(combined_tensors)
 
     ###########################################################################
     # Student code ends

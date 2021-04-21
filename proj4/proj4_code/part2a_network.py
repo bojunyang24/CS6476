@@ -60,9 +60,28 @@ class MCNET(torch.nn.Module):
         # Student code begins
         #######################################################################
 
-        raise NotImplementedError(
-            "`self.conv` and `self.classifier` for MCNET in "
-            + "`part2a_network.py` needs to be implemented"
+        padding = kernel_size//2
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, num_feature_map, kernel_size=kernel_size, stride=1, padding=padding),
+            nn.ReLU(),
+            nn.Conv2d(num_feature_map, num_feature_map, kernel_size=kernel_size, stride=1, padding=padding),
+            nn.ReLU(),
+            nn.Conv2d(num_feature_map, num_feature_map, kernel_size=kernel_size, stride=1, padding=padding),
+            nn.ReLU(),
+            nn.Conv2d(num_feature_map, num_feature_map, kernel_size=kernel_size, stride=1, padding=padding),
+            nn.ReLU(),
+            nn.Conv2d(num_feature_map, num_feature_map, kernel_size=kernel_size, stride=1, padding=padding),
+            nn.ReLU(),
+        )
+        conv_out = ws * ws * num_feature_map * 2
+
+        self.classifier = nn.Sequential(
+            nn.Linear(conv_out, num_hidden_unit),
+            nn.ReLU(),
+            nn.Linear(num_hidden_unit, num_hidden_unit),
+            nn.ReLU(),
+            nn.Linear(num_hidden_unit, 1),
+            nn.Sigmoid(),
         )
 
         #######################################################################

@@ -137,7 +137,7 @@ def calculate_cost_volume(
     block_half = block_size//2
     H = left_img.shape[0] - 2*block_half
     W = right_img.shape[1] - 2*block_half
-    cost_volume = torch.zeros(H, W, max_disparity)
+    cost_volume = torch.ones(H, W, max_disparity) * 255
     
     leftmost = block_half
     for r in range(0, cost_volume.shape[0]):
@@ -151,10 +151,10 @@ def calculate_cost_volume(
                         right_patch = right_img[row, col-disparity, :]
                         cost_volume[r, c, disparity] = sim_measure_function(left_patch, right_patch)
             else:
-                left_patch = left_img[row-block_half:row+block_half+1, col-block_half:col+block_half+1, :]
+                left_patch = left_img[row-block_half:row-block_half+block_size, col-block_half:col-block_half+block_size, :]
                 for disparity in range(max_disparity):
                     if col - block_half - disparity >= 0:
-                        right_patch = right_img[row-block_half:row+block_half+1, col-block_half-disparity:col+block_half-disparity+1, :]
+                        right_patch = right_img[row-block_half:row-block_half+block_size, col-block_half-disparity:col-block_half+block_size-disparity, :]
                         cost_volume[r, c, disparity] = sim_measure_function(left_patch, right_patch)
 
     ###########################################################################

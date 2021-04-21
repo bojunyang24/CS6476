@@ -49,3 +49,4 @@ def test_gen_patch():
         ]
     )
     assert torch.all(torch.isclose(out, gt))
+test_gen_patch()
