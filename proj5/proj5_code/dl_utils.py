@@ -31,8 +31,8 @@ def compute_accuracy(logits: torch.Tensor, labels: torch.Tensor) -> float:
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`compute_accuracy` function in '
-        + '`dl_utils.py` needs to be implemented')
+    predicted_labels = torch.argmax(logits, dim=1)
+    batch_accuracy = sum(labels == predicted_labels).item()/len(labels)
 
     ###########################################################################
     # Student code ends
@@ -63,8 +63,9 @@ def compute_loss(
     # Student code begin
     ############################################################################
 
-    raise NotImplementedError('`compute_loss` function in '
-        + '`dl_utils.py` needs to be implemented')
+    batch_size = model_output.shape[0]
+    loss = model.loss_criterion(model_output, target_labels)
+    loss = loss / batch_size if is_normalize else loss
 
     ############################################################################
     # Student code end

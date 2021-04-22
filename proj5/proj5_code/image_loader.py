@@ -63,9 +63,14 @@ class ImageLoader(data.Dataset):
         #######################################################################
         # Student code begins
         #######################################################################
-
-        raise NotImplementedError('`load_imagepaths_with_labels` function in '
-            + '`image_loader.py` needs to be implemented')
+        image_sets = os.listdir(self.curr_folder)
+        for image_set_i in range(len(image_sets)):
+            image_set = image_sets[image_set_i]
+            image_set_label = class_labels[image_set]
+            image_set_path = os.path.join(self.curr_folder, image_set)
+            for image in os.listdir(image_set_path):
+                image_path = os.path.join(image_set_path, image)
+                img_paths.append((image_path, image_set_label))
 
         #######################################################################
         # Student code ends
@@ -94,8 +99,12 @@ class ImageLoader(data.Dataset):
         # Student code begins
         #######################################################################
 
-        raise NotImplementedError('`get_classes` function in '
-            + '`dl_utils.py` needs to be implemented')
+        image_sets = os.listdir(self.curr_folder)
+        image_sets.sort()
+        label = 0
+        for image_set in image_sets:
+            classes[image_set] = label
+            label+=1
 
         #######################################################################
         # Student code ends
@@ -121,8 +130,7 @@ class ImageLoader(data.Dataset):
         # Student code begins
         #######################################################################
 
-        raise NotImplementedError('`load_img_from_path` function in '
-            + '`dl_utils.py` needs to be implemented')
+        img = Image.open(path).convert("L")
 
         #######################################################################
         # Student code ends
@@ -153,8 +161,10 @@ class ImageLoader(data.Dataset):
         # Student code starts
         #######################################################################
 
-        raise NotImplementedError('`__getitem__` function in '
-            + '`dl_utils.py` needs to be implemented')
+        image_path, class_idx = self.dataset[index]
+        img = self.load_img_from_path(image_path)
+        if self.transform:
+            img = self.transform(img)
 
         #######################################################################
         # Student code ends
@@ -175,8 +185,7 @@ class ImageLoader(data.Dataset):
         # Student code starts
         #######################################################################
 
-        raise NotImplementedError('`__len__` function in '
-            + '`dl_utils.py` needs to be implemented')
+        l = len(self.dataset)
 
         #######################################################################
         # Student code ends

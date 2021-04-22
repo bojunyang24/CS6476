@@ -33,8 +33,13 @@ def get_optimizer(
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`get_optimizer` function in '
-        + '`optimizer.py` needs to be implemented')
+    
+    if config["optimizer_type"] == "adam":
+        optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=config["lr"],
+            weight_decay=config["weight_decay"]
+        )
 
     ###########################################################################
     # Student code ends

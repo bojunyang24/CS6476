@@ -24,9 +24,8 @@ def get_fundamental_transforms(
     ###########################################################################
     # Student code begins
     ###########################################################################
-
-    raise NotImplementedError('`get_fundamental_transforms` function in '
-        + '`data_transforms.py` needs to be implemented')
+    t = [transforms.Resize(inp_size), transforms.ToTensor()]
+    fundamental_transforms = transforms.Compose(transforms=t)
 
     ###########################################################################
     # Student code ends
