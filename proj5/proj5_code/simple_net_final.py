@@ -21,8 +21,24 @@ class SimpleNetFinal(nn.Module):
         # Student code begins
         #######################################################################
 
-        raise NotImplementedError('`__init__` function in '
-            + '`simple_net_final.py` needs to be implemented')
+        self.conv_layers = nn.Sequential(
+            nn.Conv2d(1, 10, kernel_size=5, stride=1),
+            nn.BatchNorm2d(10),
+            nn.ReLU(),
+            nn.MaxPool2d(3),
+            nn.Conv2d(10, 60, kernel_size=5, stride=1),
+            nn.BatchNorm2d(60),
+            nn.Dropout(),
+            nn.ReLU(),
+            nn.Conv2d(60, 60, kernel_size=5, stride=1),
+            nn.ReLU(),
+            nn.MaxPool2d(3)
+        )
+        self.fc_layers = nn.Sequential(
+            nn.Linear(960, 100),
+            nn.Linear(100, 15)
+        )
+        self.loss_criterion = nn.CrossEntropyLoss(reduction="mean")
 
         #######################################################################
         # Student code ends
@@ -43,8 +59,9 @@ class SimpleNetFinal(nn.Module):
         # Student code begins
         #######################################################################
 
-        raise NotImplementedError('`forward` function in '
-            + '`simple_net_final.py` needs to be implemented')
+        conv_features = self.conv_layers(x)
+        flat_features = torch.flatten(conv_features, 1)
+        model_output = self.fc_layers(flat_features)
 
         #######################################################################
         # Student code ends

@@ -1,5 +1,6 @@
 import glob
 import os
+from os.path import dirname
 from typing import Tuple
 
 import numpy as np
@@ -31,8 +32,29 @@ def compute_mean_and_std(dir_name: str) -> Tuple[float, float]:
     # Student code begin
     ############################################################################
 
-    raise NotImplementedError('`compute_mean_and_std` function in '
-        + '`stats_helper.py` needs to be implemented')
+    mean, variance, std, n = 0, 0, 0, 0
+    for test_train in os.listdir(dir_name):
+        test_train_dir = os.path.join(dir_name, test_train)
+        for class_label in os.listdir(test_train_dir):
+            class_dir = os.path.join(test_train_dir, class_label)
+            for img in os.listdir(class_dir):
+                img_path = os.path.join(class_dir, img)
+                x = np.array(Image.open(img_path).convert("L")) / 255
+                img_size = x.shape[0] * x.shape[1]
+                n += img_size
+                mean += x.sum()
+    mean = mean / n
+    num_imgs = 0
+    for test_train in os.listdir(dir_name):
+        test_train_dir = os.path.join(dir_name, test_train)
+        for class_label in os.listdir(test_train_dir):
+            class_dir = os.path.join(test_train_dir, class_label)
+            for img in os.listdir(class_dir):
+                num_imgs+=1
+                img_path = os.path.join(class_dir, img)
+                x = np.array(Image.open(img_path).convert("L")) / 255
+                variance += (1 / (n-1)) * np.sum((x-mean)**2)
+    std = np.sqrt(variance)
 
     ############################################################################
     # Student code end

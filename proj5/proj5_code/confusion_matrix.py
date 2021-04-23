@@ -39,6 +39,8 @@ def generate_confusion_data(
 
     preds = np.zeros(len(dataset)).astype(np.int32)
     targets = np.zeros(len(dataset)).astype(np.int32)
+    # preds = torch.zeros(len(dataset), dtype=torch.int)
+    # targets = torch.zeros(len(dataset), dtype=torch.int)
     label_to_idx = dataset.get_classes()
     class_labels = [""] * len(label_to_idx)
 
@@ -47,8 +49,16 @@ def generate_confusion_data(
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`generate_confusion_data` function in '
-        + '`confusion_matrix.py` needs to be implemented')
+    count = 0
+    for (x, y) in loader:
+        n = x.shape[0]
+        logits = model(x)
+        predicted_label = torch.argmax(logits, dim=1)
+        preds[count] = predicted_label
+        targets[count] = y
+        class_labels[count] = label_to_idx[predicted_label]
+        count+=1
+    
 
     ###########################################################################
     # Student code ends
@@ -102,8 +112,7 @@ def generate_confusion_matrix(
         # Student code begins
         #######################################################################
 
-        raise NotImplementedError('`generate_confusion_matrix` function in '
-            + '`confusion_matrix.py` needs to be implemented')
+        confusion_matrix[target, prediction] += 1
 
         #######################################################################
         # Student code ends
@@ -114,8 +123,7 @@ def generate_confusion_matrix(
         # Student code begins
         #######################################################################
 
-        raise NotImplementedError('`generate_confusion_matrix` function in '
-            + '`confusion_matrix.py` needs to be implemented')
+        confusion_matrix = confusion_matrix / confusion_matrix.sum(axis=1)[:,None]
 
         #######################################################################
         # Student code ends

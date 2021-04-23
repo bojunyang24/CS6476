@@ -6,6 +6,7 @@ from typing import Tuple, Sequence
 
 import numpy as np
 import torchvision.transforms as transforms
+from torchvision.transforms.transforms import ColorJitter, RandomHorizontalFlip
 
 
 def get_fundamental_transforms(
@@ -51,8 +52,13 @@ def get_fundamental_augmentation_transforms(
     # Student code begin
     ###########################################################################
 
-    raise NotImplementedError('`get_fundamental_augmentation_transforms` '
-        + 'function in `data_transforms.py` needs to be implemented')
+    t = [
+        transforms.Resize(inp_size),
+        transforms.ColorJitter(),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        ]
+    fund_aug_transforms = transforms.Compose(transforms=t)
 
     ###########################################################################
     # Student code end
@@ -86,8 +92,12 @@ def get_fundamental_normalization_transforms(
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`get_fundamental_normalization_transforms` '
-        + 'function in `data_transforms.py` needs to be implemented')
+    t = [
+        transforms.Resize(inp_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=pixel_mean, std=pixel_std)
+        ]
+    fund_norm_transforms = transforms.Compose(transforms=t)
 
     ###########################################################################
     # Student code ends
@@ -119,8 +129,14 @@ def get_all_transforms(
     # Student code begins
     ###########################################################################
 
-    raise NotImplementedError('`get_all_transforms` function in '
-        + '`data_transforms.py` needs to be implemented')
+    t = [
+        transforms.Resize(inp_size),
+        transforms.ColorJitter(),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=pixel_mean, std=pixel_std)
+        ]
+    all_transforms = transforms.Compose(transforms=t)
 
     ###########################################################################
     # Student code ends
